@@ -863,21 +863,23 @@ class ProcessBuilder {
      */
     _resolveModuleLibraries(mdl){
         if(!mdl.subModules.length > 0){
-            return {}
+            return []
         }
-        let libs = {}
+        let libs = []
         for(let sm of mdl.subModules){
             if(sm.rawModule.type === Type.Library){
 
                 if(sm.rawModule.classpath ?? true) {
-                    libs[sm.getVersionlessMavenIdentifier()] = sm.getPath()
+                    libs.push(sm.getPath())
                 }
             }
             // If this module has submodules, we need to resolve the libraries for those.
             // To avoid unnecessary recursive calls, base case is checked here.
             if(mdl.subModules.length > 0){
                 const res = this._resolveModuleLibraries(sm)
-                libs = {...libs, ...res}
+                if(res.length > 0){
+                    libs = libs.concat(res)
+                }
             }
         }
         return libs
